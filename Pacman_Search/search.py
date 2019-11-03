@@ -105,8 +105,8 @@ def depthFirstSearch(problem):
             if problem.isGoalState(currentState):
                 return actions
 
-            for nextNode, nextAction, cost in problem.getSuccessors(currentState):
-                stack.push((nextNode, actions + [nextAction]))
+            for nextState, nextAction, cost in problem.getSuccessors(currentState):
+                stack.push((nextState, actions + [nextAction]))
 
 
 def breadthFirstSearch(problem):
@@ -128,14 +128,31 @@ def breadthFirstSearch(problem):
             if problem.isGoalState(currentState):
                 return actions
 
-            for nextNode, nextAction, cost in problem.getSuccessors(currentState):
-                queue.push((nextNode, actions + [nextAction]))
+            for nextState, nextAction, cost in problem.getSuccessors(currentState):
+                queue.push((nextState, actions + [nextAction]))
 
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import PriorityQueue
+
+    priorityQueue = PriorityQueue()
+    priorityQueue.push((problem.getStartState(), [], 0), 0)
+
+    visitedStates = []
+
+    while not priorityQueue.isEmpty():
+        currentState, actions, costUntilHere = priorityQueue.pop()
+
+        if currentState not in visitedStates:
+            visitedStates.append(currentState)
+
+            if problem.isGoalState(currentState):
+                return actions
+
+            for nextState, nextAction, cost in problem.getSuccessors(currentState):
+                priorityQueue.update((nextState, actions + [nextAction], costUntilHere + cost), costUntilHere + cost)
 
 
 def nullHeuristic(state, problem=None):
