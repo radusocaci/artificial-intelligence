@@ -74,7 +74,28 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+
+        foodPos = newFood.asList()
+
+        ghostPos = [s.getPosition() for s in newGhostStates]
+
+        distsFood = []
+        distsGhosts = []
+        remainingFood = len(newFood.asList())
+
+        if remainingFood == currentGameState.getFood().count():
+            #if it doesnt eat this action
+            foodCapsules = min([manhattanDistance(fpos, newPos) for fpos in foodPos])
+        else:
+            foodCapsules = 0 # this action eats
+
+        #impact of ghost
+        ghosts = min([manhattanDistance(newPos, gPos) for gPos in ghostPos])
+
+        #time ghosts are scared
+        time = newScaredTimes[0]
+
+        return successorGameState.getScore() - foodCapsules + ghosts - time
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -128,8 +149,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
           gameState.getNumAgents():
             Returns the total number of agents in the game
         """
+
+
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
