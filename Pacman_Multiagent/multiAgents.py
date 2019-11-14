@@ -234,7 +234,25 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import manhattanDistance
+
+    pacmanPos = currentGameState.getPacmanPosition()
+    foodList = currentGameState.getFood().asList()
+
+    closestFood = min([manhattanDistance(pacmanPos, food) for food in
+                       foodList]) if foodList else -1  # distance to closest food pallet
+
+    totalDistanceToGhosts = 1  # total combined distance to ghosts
+    ghostsInProximity = 0  # number of ghosts near pacman
+    for ghostPos in currentGameState.getGhostPositions():
+        distanceToGhost = manhattanDistance(pacmanPos, ghostPos)
+        totalDistanceToGhosts += distanceToGhost
+
+        if distanceToGhost <= 1:
+            ghostsInProximity += 1
+
+    return currentGameState.getScore() + (1 / float(closestFood)) - (
+            1 / float(totalDistanceToGhosts)) - ghostsInProximity - len(currentGameState.getCapsules())
 
 
 # Abbreviation
