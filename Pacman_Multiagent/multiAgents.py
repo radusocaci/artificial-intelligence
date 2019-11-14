@@ -12,11 +12,11 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-from util import manhattanDistance
-from game import Directions
-import random, util
+import random
 
-from game import Agent
+import util
+from game import Agent, manhattanDistance
+
 
 class ReflexAgent(Agent):
     """
@@ -27,7 +27,6 @@ class ReflexAgent(Agent):
       it in any way you see fit, so long as you don't touch our method
       headers.
     """
-
 
     def getAction(self, gameState):
         """
@@ -45,7 +44,7 @@ class ReflexAgent(Agent):
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        chosenIndex = random.choice(bestIndices)  # Pick randomly among the best
 
         "Add more of your code here if you want to"
 
@@ -97,6 +96,7 @@ class ReflexAgent(Agent):
 
         return successorGameState.getScore() - foodCapsules + ghosts - time
 
+
 def scoreEvaluationFunction(currentGameState):
     """
       This default evaluation function just returns the score of the state.
@@ -106,6 +106,7 @@ def scoreEvaluationFunction(currentGameState):
       (not reflex agents).
     """
     return currentGameState.getScore()
+
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -122,10 +123,11 @@ class MultiAgentSearchAgent(Agent):
       is another abstract class.
     """
 
-    def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
-        self.index = 0 # Pacman is always agent index 0
+    def __init__(self, evalFn='scoreEvaluationFunction', depth='2'):
+        self.index = 0  # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
+
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -150,8 +152,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
 
+        v = [self.minvalue(gameState.generateSuccessor(0, action), 1, 0) for action in gameState.getLegalActions(0)]
+        i = v.index(max(v))
+        return gameState.getLegalActions(0)[i]  # the pacman will do the action chosen
 
-        "*** YOUR CODE HERE ***"
+    def minvalue(self, gameState, i, depth):
+        if gameState.isWin() or gameState.isLose() or depth == self.depth:
+            return self.evaluationFunction(gameState)
+
+        depth += 1 if i + 1 == gameState.getNumAgents() else 0
+        values = [self.minvalue(gameState.generateSuccessor(i, action), (i + 1) % gameState.getNumAgents(), depth) for
+                  action in gameState.getLegalActions(i)]
+
+        return max(values) if i == 0 else min(values)
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -164,6 +178,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -180,6 +195,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
+
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
@@ -190,6 +206,6 @@ def betterEvaluationFunction(currentGameState):
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
+
 # Abbreviation
 better = betterEvaluationFunction
-
