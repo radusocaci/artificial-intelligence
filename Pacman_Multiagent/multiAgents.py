@@ -177,7 +177,37 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.alfabetavalue(gameState, 0, 0, -999999, 999999)[1]  # the pacman will do the action chosen
+
+    # a - MAX's best option on path to root
+    # b - MIN's best option on path to root
+    def alfabetavalue(self, gameState, i, depth, a, b):
+        if gameState.isWin() or gameState.isLose() or depth == self.depth:
+            return (self.evaluationFunction(gameState), None) # max depth is reached or the game is ended
+
+        depth += 1 if i + 1 == gameState.getNumAgents() else 0 # if we reached the last ghost, we increase the depth of the graph
+
+        if i == 0: # if agent is pacman , maximize
+            best = (-999999, None) #tuple will hold the state values and the coresponding action
+            for action in gameState.getLegalActions(i): #iterate through agent's legal actions
+                v = self.alfabetavalue(gameState.generateSuccessor(i, action), (i + 1) % gameState.getNumAgents(), depth, a ,b)[0]#minimax value for next agent
+                if best[0] < v:
+                    best = (v, action)
+                if v > b:
+                    return best #if node becomes worse than a, stop considering it's children
+                a = max(a, best[0])
+            return best
+        else: #if agent is ghost, minimize
+            best = (999999, None)
+            for action in gameState.getLegalActions(i):
+                v = self.alfabetavalue(gameState.generateSuccessor(i, action), (i + 1) % gameState.getNumAgents(), depth, a, b)[0]#minimax value for the next agent
+                if best[0] > v:
+                    best = (v, action)
+                if v < a:
+                    return best #if node becomes worse than a, MAX avoids it
+                b = min(b, best[0])
+            return best
+
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
