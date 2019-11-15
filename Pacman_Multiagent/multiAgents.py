@@ -75,21 +75,17 @@ class ReflexAgent(Agent):
         "*** YOUR CODE HERE ***"
 
         foodPos = newFood.asList()
-
         ghostPos = [s.getPosition() for s in newGhostStates]
-
-        distsFood = []
-        distsGhosts = []
         remainingFood = len(newFood.asList())
 
         if remainingFood == currentGameState.getFood().count():
-            #if it doesnt eat this action
-            foodCapsules = min([manhattanDistance(fpos, newPos) for fpos in foodPos])
+            #if pac-man doesnt eat this action
+            foodCapsules = min([manhattanDistance(fpos, newPos) for fpos in foodPos]) #impact of closest food
         else:
             foodCapsules = 0 # this action eats
 
         #impact of ghost
-        ghosts = min([manhattanDistance(newPos, gPos) for gPos in ghostPos])
+        ghosts = min([manhattanDistance(newPos, gPos) for gPos in ghostPos]) #impact of closest ghost
 
         #time ghosts are scared
         time = newScaredTimes[0]
@@ -151,19 +147,22 @@ class MinimaxAgent(MultiAgentSearchAgent):
           gameState.getNumAgents():
             Returns the total number of agents in the game
         """
-
+        #out of all ghost's states values, pac-man will select the maximum one
         v = [self.minvalue(gameState.generateSuccessor(0, action), 1, 0) for action in gameState.getLegalActions(0)]
-        i = v.index(max(v))
+        i = v.index(max(v)) #under pac-man's control
         return gameState.getLegalActions(0)[i]  # the pacman will do the action chosen
 
-    def minvalue(self, gameState, i, depth):
+    #computes each node's minimax value
+    def minvalue(self, gameState, i, depth): #under opponent's control (ghosts)
         if gameState.isWin() or gameState.isLose() or depth == self.depth:
-            return self.evaluationFunction(gameState)
+            return self.evaluationFunction(gameState) #if depth given is reached or game is ended we return the state value of the evaluation function
+        # replace terminal utilities with an evaluation function for non-terminal positions
 
-        depth += 1 if i + 1 == gameState.getNumAgents() else 0
+        depth += 1 if i + 1 == gameState.getNumAgents() else 0 #when all children nodes of the ghost's node are visited, we increase the depth of the state-space tree
+
         values = [self.minvalue(gameState.generateSuccessor(i, action), (i + 1) % gameState.getNumAgents(), depth) for
                   action in gameState.getLegalActions(i)]
-
+        # out of all ghost's next states values, pac-man will select the maximum one
         return max(values) if i == 0 else min(values)
 
 
@@ -194,7 +193,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 if best[0] < v:
                     best = (v, action)
                 if v > b:
-                    return best #if node becomes worse than a, stop considering it's children
+                    return best #if node becomes worse , stop considering it's children
                 a = max(a, best[0])
             return best
         else: #if agent is ghost, minimize
@@ -225,6 +224,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
 
         #Values should now reflect average-case (expectimax) outcomes, not worst-case (minimax) outcomes"
+        #Uncertain outcomes controlled by chance, not an adversary!
 
         v = [self.expmax(gameState.generateSuccessor(0, action), 1, 0) for action in gameState.getLegalActions(0)]
         i = v.index(max(v)) #Max nodes as in minimax search
@@ -240,7 +240,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             values = [self.expmax(gameState.generateSuccessor(i, action), 1, depth) for action in gameState.getLegalActions(i)]
             return max(values)
         else:
-            depth += 1 if i + 1 == gameState.getNumAgents() else 0
+            depth += 1 if i + 1 == gameState.getNumAgents() else 0 # if we reached the last ghost, we increase the depth of the graph
             #Calculate their expected utilities by taking weighted average (expectation) of children
             values = [self.expmax(gameState.generateSuccessor(i, action), (i + 1) % gameState.getNumAgents(), depth) for action in gameState.getLegalActions(i)]
             return sum(values) / float(len(gameState.getLegalActions(i)))
@@ -251,16 +251,20 @@ def betterEvaluationFunction(currentGameState):
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+      DESCRIPTION: We take into consideration the distance to the closest food, total distance to all ghosts and the number of ghosts in pac-man's proximity.
+                   Taking the current score as a starting point, we add/subtract the factors above by some rules:
+                        - closestFood and distance to ghosts are not that relevant, so we will consider them with small values
+                        - the closer the food is, the better, so we add this value to the total score
+                        - the smaller the distance to ghosts, the worse, so we will subtract this value and make is subunit
+                        - if a ghost is in pacmans proximity, the score needs to be heavily influenced in a negative way
+                        - number of capsules are also subtracted, since we prefer a following state which eats a capsule
     """
     "*** YOUR CODE HERE ***"
-    from util import manhattanDistance
-
     pacmanPos = currentGameState.getPacmanPosition()
     foodList = currentGameState.getFood().asList()
 
     closestFood = min([manhattanDistance(pacmanPos, food) for food in
-                       foodList]) if foodList else -1  # distance to closest food pallet
+                       foodList]) if foodList else -1  # distance to closest food pellet
 
     totalDistanceToGhosts = 1  # total combined distance to ghosts
     ghostsInProximity = 0  # number of ghosts near pacman
@@ -271,8 +275,7 @@ def betterEvaluationFunction(currentGameState):
         if distanceToGhost <= 1:
             ghostsInProximity += 1
 
-    return currentGameState.getScore() + (1 / float(closestFood)) - (
-            1 / float(totalDistanceToGhosts)) - ghostsInProximity - len(currentGameState.getCapsules())
+    return currentGameState.getScore() + (1 / float(closestFood)) - (1 / float(totalDistanceToGhosts)) - ghostsInProximity - len(currentGameState.getCapsules())
 
 
 # Abbreviation
