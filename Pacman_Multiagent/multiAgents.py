@@ -223,7 +223,27 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        #Values should now reflect average-case (expectimax) outcomes, not worst-case (minimax) outcomes"
+
+        v = [self.expmax(gameState.generateSuccessor(0, action), 1, 0) for action in gameState.getLegalActions(0)]
+        i = v.index(max(v)) #Max nodes as in minimax search
+
+        return gameState.getLegalActions(0)[i]  # the pacman will do the action chosen
+
+    #compute the average score under optimal play
+    def expmax(self, gameState, i, depth):
+        if gameState.isWin() or gameState.isLose() or depth == self.depth:
+            return self.evaluationFunction(gameState)
+
+        if i == 0: #if agent is max / pac-man
+            values = [self.expmax(gameState.generateSuccessor(i, action), 1, depth) for action in gameState.getLegalActions(i)]
+            return max(values)
+        else:
+            depth += 1 if i + 1 == gameState.getNumAgents() else 0
+            #Calculate their expected utilities by taking weighted average (expectation) of children
+            values = [self.expmax(gameState.generateSuccessor(i, action), (i + 1) % gameState.getNumAgents(), depth) for action in gameState.getLegalActions(i)]
+            return sum(values) / float(len(gameState.getLegalActions(i)))
 
 
 def betterEvaluationFunction(currentGameState):
