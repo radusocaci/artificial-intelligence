@@ -306,18 +306,17 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startingPosition, []
+        return self.startingPosition, []  # (pacman position, list of visited corners)
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        if state[0] in self.corners:
-            if not state[0] in state[1]:
-                state[1].append(state[0])
+        if state[0] in self.corners and not state[0] in state[1]:  # if pacman is in an unvisited corner
+                state[1].append(state[0])  # add the corner to the state
 
-        return len(state[1]) == 4
+        return len(state[1]) == 4  # if pacman visited all 4 corners => goal state
 
     def getSuccessors(self, state):
         """
@@ -340,13 +339,15 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-            dx, dy = Actions.directionToVector(action)
-            nextNode = (state[0][0] + dx, state[0][1] + dy)
-            if not self.walls[int(nextNode[0])][int(nextNode[1])]:
+            dx, dy = Actions.directionToVector(action)  # get the actual x/y direction for each possible move
+            nextNode = (state[0][0] + dx, state[0][1] + dy)  # add dx/dy to the current pacman position to obtain the next position
+            if not self.walls[int(nextNode[0])][int(nextNode[1])]:  # if pacman does not hit a wall
                 cornerList = state[1][:]
-                if nextNode in self.corners and nextNode not in state[1]:
-                    cornerList.append(nextNode)
-                successors.append(((nextNode, cornerList), action, 1))
+
+                if nextNode in self.corners and nextNode not in state[1]:  # if pacman is in an unvisited corner
+                    cornerList.append(nextNode)  # add the corner to the state
+
+                successors.append(((nextNode, cornerList), action, 1))  # generate successor with predefined cost of 1
 
         self._expanded += 1  # DO NOT CHANGE
         return successors
@@ -382,13 +383,12 @@ def cornersHeuristic(state, problem):
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    unvisitedCorners = [corner for corner in corners if corner not in state[1]]
-    currentPosition = state[0]
+    unvisitedCorners = [corner for corner in corners if corner not in state[1]]  # compute all unvisited corners
+    currentPosition = state[0]  # pacman current position
     totalCost = 0
 
-    while (unvisitedCorners):
-        costToCorner, corner = min(
-            [(util.manhattanDistance(currentPosition, corner), corner) for corner in unvisitedCorners])
+    while (unvisitedCorners):  # compute the minimum walk through all the corners (greedy style)
+        costToCorner, corner = min([(util.manhattanDistance(currentPosition, corner), corner) for corner in unvisitedCorners])
         totalCost += costToCorner
         currentPosition = corner
         unvisitedCorners.remove(corner)
@@ -494,6 +494,7 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+    # compute the maximum distance (actual maze distance) to any food
     return max([mazeDistance(position, foodLocation, problem.startingGameState) for foodLocation in
                 foodGrid.asList()]) if foodGrid.count() else 0
 

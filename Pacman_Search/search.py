@@ -92,21 +92,21 @@ def depthFirstSearch(problem):
     from util import Stack
 
     stack = Stack()
-    stack.push((problem.getStartState(), []))
+    stack.push((problem.getStartState(), []))  # start state with the associated actions list
 
-    visitedStates = []
+    visitedStates = []  # visited states list # TODO implement as set
 
-    while not stack.isEmpty():
-        currentState, actions = stack.pop()
+    while not stack.isEmpty():  # as long as there are items left to process
+        currentState, actions = stack.pop()  # process current node
 
-        if currentState not in visitedStates:
+        if currentState not in visitedStates:  # if it was already visited by DFS => skip this node
             visitedStates.append(currentState)
 
-            if problem.isGoalState(currentState):
-                return actions
+            if problem.isGoalState(currentState):  # we return the actions if we discovered a goal state
+                return actions  # TODO check goal when successor is generated
 
             for nextState, nextAction, cost in problem.getSuccessors(currentState):
-                stack.push((nextState, actions + [nextAction]))
+                stack.push((nextState, actions + [nextAction]))  # compute successors in graph and add the to the stack
 
 
 def breadthFirstSearch(problem):
@@ -114,7 +114,7 @@ def breadthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     from util import Queue
 
-    queue = Queue()
+    queue = Queue()  # the same as DFS, but using a queue instead
     queue.push((problem.getStartState(), []))
 
     visitedStates = []
@@ -137,8 +137,8 @@ def uniformCostSearch(problem):
     "*** YOUR CODE HERE ***"
     from util import PriorityQueue
 
-    priorityQueue = PriorityQueue()
-    priorityQueue.push((problem.getStartState(), [], 0), 0)
+    priorityQueue = PriorityQueue()  # same as BFS but nodes are explored in the order of their cost
+    priorityQueue.push((problem.getStartState(), [], 0), 0)  # the state also has a total cost path to keep track of the cost
 
     visitedStates = []
 
@@ -151,7 +151,7 @@ def uniformCostSearch(problem):
             if problem.isGoalState(currentState):
                 return actions
 
-            for nextState, nextAction, cost in problem.getSuccessors(currentState):
+            for nextState, nextAction, cost in problem.getSuccessors(currentState):  # the cost is also updated
                 priorityQueue.update((nextState, actions + [nextAction], costUntilHere + cost), costUntilHere + cost)
 
 
@@ -169,7 +169,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     from util import PriorityQueue
 
     priorityQueue = PriorityQueue()
-    priorityQueue.push((problem.getStartState(), [], 0), 0)
+    priorityQueue.push((problem.getStartState(), [], 0), 0)  # state is the same as UCS
 
     visitedStates = []
 
@@ -184,7 +184,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
             for nextState, nextAction, cost in problem.getSuccessors(currentState):
                 priorityQueue.update((nextState, actions + [nextAction], costUntilHere + cost),
-                                     costUntilHere + cost + heuristic(nextState, problem))
+                                     costUntilHere + cost + heuristic(nextState, problem))  # priority queue takes into consideration the heuristic
 
 
 # Abbreviations
