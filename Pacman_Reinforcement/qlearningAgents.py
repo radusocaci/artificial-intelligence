@@ -10,7 +10,7 @@
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
-
+import random
 
 import util
 from learningAgents import ReinforcementAgent
@@ -93,13 +93,14 @@ class QLearningAgent(ReinforcementAgent):
           HINT: You might want to use util.flipCoin(prob)
           HINT: To pick randomly from a list, use random.choice(list)
         """
-        # Pick Action
         legalActions = self.getLegalActions(state)
-        action = None
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
-        return action
+        if len(legalActions) == 0:
+            return None
+        eps = self.epsilon
+        if util.flipCoin(eps):  #get a random action with epsilon probability
+            return random.choice(legalActions) #pick an action randomly from the possible actions
+        else:
+            return self.computeActionFromQValues(state) #return the policy (best action)
 
     def update(self, state, action, nextState, reward):
         """
